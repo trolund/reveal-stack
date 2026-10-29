@@ -1,0 +1,58 @@
+.stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Each overlapping grid measures the same space with its own breakpoint. */
+.slot {
+  --required-size: calc((var(--order) + 1) * var(--item-size) + var(--order) * var(--gap));
+  /* Query em units resolve against this computed breakpoint. */
+  font-size: var(--required-size);
+  container: stack-slot / size;
+  writing-mode: vertical-lr;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--count), var(--item-size));
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--gap);
+  justify-content: start;
+  pointer-events: none;
+}
+
+.item {
+  grid-column: var(--index);
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  writing-mode: horizontal-tb;
+  font-size: 1rem;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.stack:is([data-direction='top'], [data-direction='left']) > .slot {
+  justify-content: end;
+}
+
+/* The grid's inline axis follows the overflow axis; content stays horizontal. */
+.stack:is([data-direction='left'], [data-direction='right']) > .slot {
+  writing-mode: horizontal-tb;
+}
+
+@container stack-slot (inline-size >= 1em) {
+  .item {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Only entering items transition: overflow must disappear immediately. */
+  @media (prefers-reduced-motion: no-preference) {
+    .stack[data-animate='true'] > .slot > .item {
+      transition: opacity 180ms ease-out;
+    }
+  }
+}
